@@ -25,11 +25,11 @@ import CustomHeader from './header/CustomHeader';
 export default function ProfileEdit({navigation}) {
   const [user, setUser] = useState({});
   const [passwordSecured, setPasswordSecured] = useState(true);
-  const [fullname, setFullname] = useState({});
-  const [email, setEmail] = useState({});
-  const [mobile, setMobile] = useState({});
-  const [password, setPassword] = useState({});
-  const [confirmPassword, setConfirmPassword] = useState({});
+  const [fullname, setFullname] = useState('');
+  const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [singleFile, setSingleFile] = useState('');
 
   const getUser = async () => {
@@ -45,7 +45,7 @@ export default function ProfileEdit({navigation}) {
         {
           setFullname(user.fullname);
           setEmail(user.email);
-          setMobile(user.mobile);
+          setMobile(JSON.stringify(user.mobile));
           setPassword(user.password);
           setConfirmPassword(user.cnfmPassword);
         }
@@ -68,10 +68,11 @@ export default function ProfileEdit({navigation}) {
       maxWidth: 100,
       maxHeight: 100,
       selectionLimit: 1,
+      includeBase64: true,
     };
     launchImageLibrary(options, response => {
-      console.log('Response = ', response);
-      setSingleFile(response);
+      console.log('response : ' + JSON.stringify(response.assets[0].base64));
+      setSingleFile(response.assets[0].base64);
       console.log(response);
       if (response.didCancel) {
         alert('User cancelled camera picker');
@@ -89,28 +90,35 @@ export default function ProfileEdit({navigation}) {
     });
   };
 
+  // <=========== Edit Profile ================>
+  function editProfile() {
+    handleSubmit();
+  }
   const handleSubmit = async () => {
-    console.log(singleFile.assets[0].uri, fullname, email, mobile, password);
+    console.log(singleFile, fullname, email, mobile, password);
     const data = new FormData();
     data.append('fullname', fullname);
     data.append('email', email);
     data.append('mobile', mobile);
     data.append('password', password);
     data.append('cnfmPassword', confirmPassword);
-    data.append('userimg', singleFile.assets[0].uri);
+    data.append('userimg', singleFile);
 
-    axios
-      .post(`http://65.0.80.5:5000/api/user/edituserbytoken`, data, {
-        headers: {
-          'user-token': await AsyncStorage.getItem('user-token'),
-        },
-      })
+    fetch(`http://65.0.80.5:5000/api/user/edituserbytoken`, {
+      method: 'post',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'user-token': await AsyncStorage.getItem('user-token'),
+      },
+      body: data,
+    })
       .then(response => {
-        //console.log(response.data);
-        console.log('@@@@@', response.data);
+        response.json().then(res => {
+          console.log(res);
+        });
       })
       .catch(error => {
-        console.log(error.response.data);
+        console.log(error);
       });
   };
   return (
@@ -218,7 +226,7 @@ export default function ProfileEdit({navigation}) {
               />
             </View>
           </View>
-          <TouchableOpacity style={styles.logbut} onPress={handleSubmit}>
+          <TouchableOpacity style={styles.logbut} onPress={editProfile}>
             <Text style={{fontSize: 20, fontWeight: 'bold', color: 'white'}}>
               Update
             </Text>

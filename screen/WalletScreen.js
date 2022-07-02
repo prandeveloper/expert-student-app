@@ -16,6 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Modal from 'react-native-modal';
 import {launchImageLibrary} from 'react-native-image-picker';
+//import DocumentPicker from 'react-native-document-picker';
 import Clipboard from '@react-native-clipboard/clipboard';
 import NotifyHeader from './header/NotifyHeader';
 import WithdrawInr from './WithdrawInr';
@@ -28,7 +29,7 @@ export default function WalletScreen({navigation}) {
   const [wamount, setWamount] = useState({});
   const [inr, setInr] = useState('');
   const [usd, setUsd] = useState('');
-  const [screenshot, setScreenshot] = useState('');
+  const [screenShot, setScreenshot] = useState('');
   const [screenshootTwo, setScreenshootTwo] = useState('');
 
   const copyToClipboard = () => {
@@ -57,7 +58,7 @@ export default function WalletScreen({navigation}) {
       .then(response => {
         const wamount = response.data.data;
         setWamount(wamount);
-        console.log(wamount);
+        //console.log(wamount);
       })
       .catch(error => {
         console.log(error);
@@ -71,88 +72,107 @@ export default function WalletScreen({navigation}) {
   }, []);
 
   // <=============== Post Api ==============>
-
+  function sendAmountServer() {
+    addAmount();
+  }
   const addAmount = async () => {
-    const formData = new FormData();
-    formData.append('inr', inr);
-    formData.append('usd', 0);
-    formData.append('screenshot', screenshot.assets[0].uri);
-    axios
-      .post(`http://65.0.80.5:5000/api/admin/req_amount`, formData, {
-        headers: {
-          'user-token': await AsyncStorage.getItem('user-token'),
-        },
-      })
+    let formdata = new FormData();
+
+    formdata.append('usd', 0);
+    formdata.append('inr', inr);
+    formdata.append('screenshot', screenShot);
+
+    fetch('http://65.0.80.5:5000/api/admin/req_amount', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'user-token': await AsyncStorage.getItem('user-token'),
+      },
+      body: formdata,
+    })
       .then(response => {
-        console.log(response.data.data);
-        {
-          response.data.message == 'success' &&
-          response.data.message === 'success'
-            ? Alert.alert('Request Send Successfully , Wait for Confirmation')
-            : null;
-        }
-        setInr('');
-        screenshot('');
+        response.json().then(res => {
+          console.log(res);
+          {
+            res.message == 'success' && res.message === 'success'
+              ? Alert.alert('Request Send Successfully , Wait for Confirmation')
+              : null;
+          }
+          setInr('');
+          setScreenshot('');
+          toggleModal();
+        });
       })
-      .catch(error => {
-        console.log(error);
+      .catch(err => {
+        console.log('error');
       });
   };
 
   // <================Add USD ================>
-  const addAmountUsd = async usd => {
-    console.log(usd, inr);
-    axios
-      .post(
-        `http://65.0.80.5:5000/api/admin/req_amount`,
-        {
-          usd: parseInt(usd),
-          inr: 0,
-        },
-        {
-          headers: {
-            'user-token': await AsyncStorage.getItem('user-token'),
-          },
-        },
-      )
+  function DepositUsd() {
+    addAmountUsd();
+  }
+  const addAmountUsd = async () => {
+    console.log(usd, screenshootTwo);
+    let formdata = new FormData();
+
+    formdata.append('usd', usd);
+    formdata.append('inr', 0);
+    formdata.append('screenshot', screenshootTwo);
+
+    fetch('http://65.0.80.5:5000/api/admin/req_amount', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'user-token': await AsyncStorage.getItem('user-token'),
+      },
+      body: formdata,
+    })
       .then(response => {
-        console.log(response.data);
-        console.log(response.data.message);
-        {
-          response.data.message == 'success' &&
-          response.data.message === 'success'
-            ? Alert.alert('Request Send Successfully , Wait for Confirmation')
-            : null;
-        }
-        setUsd('');
+        response.json().then(res => {
+          console.log(res);
+          {
+            res.message == 'success' && res.message === 'success'
+              ? Alert.alert('Request Send Successfully , Wait for Confirmation')
+              : null;
+          }
+          toggleModalTwo();
+          setUsd('');
+          setScreenshootTwo('');
+        });
       })
-      .catch(error => {
-        console.log(error);
+      .catch(err => {
+        console.log('error');
       });
-  };
-
-  // <=============== Modal Function ==============>
-
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  };
-
-  const toggleModalTwo = () => {
-    setIsModal(!isModal);
   };
 
   // <=============== Get Image ==============>
 
-  const chooseFrontFile = type => {
+  const chooseFrontFile = photo => {
+    // try {
+    //   const res = await DocumentPicker.pick({
+    //     type: [DocumentPicker.types.images],
+    //   });
+    //   console.log('res : ' + JSON.stringify(res));
+    //   setScreenshot(res[0].uri);
+    // } catch (err) {
+    //   if (DocumentPicker.isCancel(err)) {
+    //     alert('Canceled from single doc picker');
+    //   } else {
+    //     alert('Unknown Error: ' + JSON.stringify(err));
+    //     throw err;
+    //   }
+    // }
     let options = {
-      mediaType: 'photo',
+      mediaType: photo,
       maxWidth: 100,
       maxHeight: 100,
       selectionLimit: 1,
+      includeBase64: true,
     };
     launchImageLibrary(options, response => {
-      console.log('Response = ', response);
-      setScreenshot(response);
+      console.log('response : ' + JSON.stringify(response.assets[0].base64));
+      setScreenshot(response.assets[0].base64);
       console.log(response);
       if (response.didCancel) {
         alert('User cancelled camera picker');
@@ -177,7 +197,7 @@ export default function WalletScreen({navigation}) {
       maxHeight: 80,
     };
     launchImageLibrary(options, response => {
-      // console.log('Response = ', response);
+      console.log('response : ' + JSON.stringify(response.assets[0].uri));
       setScreenshootTwo(response.assets[0].uri);
       console.log(response.assets[0].uri);
       if (response.didCancel) {
@@ -194,6 +214,16 @@ export default function WalletScreen({navigation}) {
         return;
       }
     });
+  };
+
+  // <=============== Modal Function ==============>
+
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+
+  const toggleModalTwo = () => {
+    setIsModal(!isModal);
   };
 
   const myModal = () => {};
@@ -287,7 +317,7 @@ export default function WalletScreen({navigation}) {
                       </TouchableOpacity>
                       <TouchableOpacity style={styles.form}>
                         <Image
-                          source={{uri: `${screenshot}`}}
+                          source={{uri: `${screenShot}`}}
                           style={{
                             height: 200,
                             width: 60,
@@ -302,7 +332,7 @@ export default function WalletScreen({navigation}) {
                   <View style={styles.modalBtn}>
                     <TouchableOpacity
                       style={styles.addButton}
-                      onPress={addAmount}>
+                      onPress={sendAmountServer}>
                       <Text style={styles.addText}>REQUEST</Text>
                     </TouchableOpacity>
                   </View>
@@ -387,7 +417,7 @@ export default function WalletScreen({navigation}) {
                   <View style={styles.modalBtn}>
                     <TouchableOpacity
                       style={styles.addButton}
-                      onPress={() => addAmountUsd(usd)}>
+                      onPress={addAmountUsd}>
                       <Text style={styles.addText}>REQUEST</Text>
                     </TouchableOpacity>
                   </View>

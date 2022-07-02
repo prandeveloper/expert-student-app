@@ -340,6 +340,8 @@ const App = ({navigation}) => {
   };
   useEffect(() => {
     getUser();
+  }, []);
+  useEffect(() => {
     getBadge();
   }, []);
 

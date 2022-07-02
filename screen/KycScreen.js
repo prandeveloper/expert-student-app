@@ -9,9 +9,9 @@ import {
   Button,
   Platform,
   PermissionsAndroid,
+  Alert,
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
-//import {Radio} from 'native-base';
 import axios from 'axios';
 import {ScrollView} from 'react-native-gesture-handler';
 import DatePicker from 'react-native-datepicker';
@@ -157,7 +157,10 @@ export default function KycScreen({navigation}) {
       }
     });
   };
-
+  // <======================Post Kyc ==============>
+  function submitKyc() {
+    submit();
+  }
   const submit = async () => {
     console.log(
       gender,
@@ -176,17 +179,32 @@ export default function KycScreen({navigation}) {
     data.append('front', frontPhoto);
     data.append('back', backPhoto);
     data.append('photo', filePath);
-    axios
-      .post(`http://65.0.80.5:5000/api/user/addkycform`, data, {
-        headers: {
-          'user-token': await AsyncStorage.getItem('user-token'),
-        },
+    fetch(`http://65.0.80.5:5000/api/user/addkycform`, {
+      method: 'post',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'user-token': await AsyncStorage.getItem('user-token'),
+      },
+      body: data,
+    })
+      .then(response => {
+        response.json().then(res => {
+          console.log(res);
+          {
+            res.message == 'success' && res.message === 'success'
+              ? Alert.alert('KYC Done Successfully')
+              : null;
+          }
+          setGender('');
+          setDate('');
+          setAadhar_num('');
+          setFrontPhoto('');
+          setBackPhoto('');
+          setFilePath('');
+        });
       })
-      .then(function (response) {
-        console.log(response.data);
-      })
-      .catch(function (error) {
-        console.log(error.response);
+      .catch(error => {
+        console.log(error);
       });
   };
 
@@ -213,7 +231,11 @@ export default function KycScreen({navigation}) {
             <Text style={styles.fieldText}>Gender</Text>
             <View>
               <Picker
-                style={{marginVertical: 10}}
+                style={{
+                  marginHorizontal: 20,
+                  color: 'black',
+                  backgroundColor: '#E8E8E8',
+                }}
                 selectedValue={gender}
                 onValueChange={itemValue => setGender(itemValue)}>
                 <Picker.Item label="Male" value="Male" />
@@ -337,23 +359,21 @@ export default function KycScreen({navigation}) {
                 source={require('../src/camera.png')}
               />
             </TouchableOpacity>
-            {/* <View>
-              {filePath?.map(file => (
-                <Image
-                  style={{
-                    width: 300,
-                    height: 200,
-                    alignSelf: 'center',
-                    justifyContent: 'center',
-                    marginTop: 50,
-                  }}
-                  source={{uri: `${file?.uri}`}}
-                />
-              ))}
-            </View> */}
+            <View>
+              <Image
+                style={{
+                  width: 300,
+                  height: 200,
+                  alignSelf: 'center',
+                  justifyContent: 'center',
+                  marginTop: 50,
+                }}
+                source={{uri: `${filePath}`}}
+              />
+            </View>
           </View>
           <Text>{'\n'}</Text>
-          <TouchableOpacity style={styles.logbut} onPress={submit}>
+          <TouchableOpacity style={styles.logbut} onPress={submitKyc}>
             <Text style={{fontSize: 20, fontWeight: 'bold', color: 'white'}}>
               Submit
             </Text>

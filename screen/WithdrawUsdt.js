@@ -57,7 +57,7 @@ const WithdrawUsdt = () => {
   return (
     <View>
       <TouchableOpacity style={styles.addButton} onPress={toggleModalFour}>
-        <Text style={styles.addText}>WITHDRAW INR</Text>
+        <Text style={styles.addText}>WITHDRAW USDT</Text>
       </TouchableOpacity>
       <Modal isVisible={usdtModal}>
         <View style={styles.modalIcon}>
