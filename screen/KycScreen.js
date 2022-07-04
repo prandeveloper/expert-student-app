@@ -76,18 +76,18 @@ export default function KycScreen({navigation}) {
   };
   const captureImage = async type => {
     let options = {
-      mediaType: type,
-      maxWidth: 150,
-      maxHeight: 150,
+      mediaType: 'photo',
+      maxWidth: 200,
+      maxHeight: 200,
       saveToPhotos: true,
-      quality: 5,
+      includeBase64: true,
     };
     let isCameraPermitted = await requestCameraPermission();
     let isStoragePermitted = await requestExternalWritePermission();
     if (isCameraPermitted && isStoragePermitted) {
       launchCamera(options, response => {
-        setFilePath(response.assets[0].uri);
-        console.log(response.assets[0].uri);
+        setFilePath(response);
+        console.log(response.assets[0].base64);
 
         if (response.didCancel) {
           alert('User cancelled camera picker');
@@ -107,15 +107,15 @@ export default function KycScreen({navigation}) {
   };
   const chooseFrontFile = type => {
     let options = {
-      mediaType: type,
-      maxWidth: 80,
-      maxHeight: 80,
-      quality: 1,
+      mediaType: 'photo',
+      maxWidth: 200,
+      maxHeight: 200,
+      includeBase64: true,
     };
     launchImageLibrary(options, response => {
       // console.log('Response = ', response);
-      setFrontPhoto(response.assets[0].uri);
-      console.log(response.assets[0].uri);
+      setFrontPhoto(response);
+      console.log(response.assets[0].base64);
       if (response.didCancel) {
         alert('User cancelled camera picker');
         return;
@@ -134,14 +134,14 @@ export default function KycScreen({navigation}) {
   const chooseBackFile = type => {
     let options = {
       mediaType: type,
-      maxWidth: 80,
-      maxHeight: 80,
-      quality: 1,
+      maxWidth: 200,
+      maxHeight: 200,
+      includeBase64: true,
     };
     launchImageLibrary(options, response => {
       // console.log('Response = ', response);
-      setBackPhoto(response.assets[0].uri);
-      console.log(response.assets[0].uri);
+      setBackPhoto(response);
+      console.log(response.assets[0].base64);
       if (response.didCancel) {
         alert('User cancelled camera picker');
         return;
@@ -176,9 +176,9 @@ export default function KycScreen({navigation}) {
     data.append('dob', date);
     data.append('nationality', national);
     data.append('aadhar_num', aadhar_num);
-    data.append('front', frontPhoto);
-    data.append('back', backPhoto);
-    data.append('photo', filePath);
+    data.append('front', frontPhoto.assets[0].base64);
+    data.append('back', backPhoto.assets[0].base64);
+    data.append('photo', filePath.assets[0].base64);
     fetch(`http://65.0.80.5:5000/api/user/addkycform`, {
       method: 'post',
       headers: {
@@ -360,16 +360,7 @@ export default function KycScreen({navigation}) {
               />
             </TouchableOpacity>
             <View>
-              <Image
-                style={{
-                  width: 300,
-                  height: 200,
-                  alignSelf: 'center',
-                  justifyContent: 'center',
-                  marginTop: 50,
-                }}
-                source={{uri: `${filePath}`}}
-              />
+              <Text>hhjhjjhj</Text>
             </View>
           </View>
           <Text>{'\n'}</Text>

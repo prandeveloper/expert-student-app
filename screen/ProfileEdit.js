@@ -71,9 +71,9 @@ export default function ProfileEdit({navigation}) {
       includeBase64: true,
     };
     launchImageLibrary(options, response => {
-      console.log('response : ' + JSON.stringify(response.assets[0].base64));
-      setSingleFile(response.assets[0].base64);
-      console.log(response);
+      console.log('response : ' + JSON.stringify(response));
+      setSingleFile(response);
+      console.log(response.assets[0].base64);
       if (response.didCancel) {
         alert('User cancelled camera picker');
         return;
@@ -95,14 +95,14 @@ export default function ProfileEdit({navigation}) {
     handleSubmit();
   }
   const handleSubmit = async () => {
-    console.log(singleFile, fullname, email, mobile, password);
+    console.log(singleFile.assets[0].base64, fullname, email, mobile, password);
     const data = new FormData();
     data.append('fullname', fullname);
     data.append('email', email);
     data.append('mobile', mobile);
     data.append('password', password);
     data.append('cnfmPassword', confirmPassword);
-    data.append('userimg', singleFile);
+    data.append('userimg', singleFile.assets[0].base64);
 
     fetch(`http://65.0.80.5:5000/api/user/edituserbytoken`, {
       method: 'post',
@@ -218,13 +218,19 @@ export default function ProfileEdit({navigation}) {
                 <Icon name="camera" color="black" size={20} />
               </TouchableOpacity>
             </View>
-            <View style={styles.inputimage2}>
-              <Image
-                source={{uri: `${user?.userimg}`}}
-                resizeMode="stretch"
-                style={{width: 100, height: 100}}
-              />
-            </View>
+            {singleFile != '' &&
+            singleFile != undefined &&
+            singleFile != null ? (
+              <View style={styles.inputimage2}>
+                <Text style={{color: 'black'}}>
+                  {singleFile.assets[0].fileName}
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.inputimage2}>
+                <Text style={{color: 'black'}}>Upload Image</Text>
+              </View>
+            )}
           </View>
           <TouchableOpacity style={styles.logbut} onPress={editProfile}>
             <Text style={{fontSize: 20, fontWeight: 'bold', color: 'white'}}>

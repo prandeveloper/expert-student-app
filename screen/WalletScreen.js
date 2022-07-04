@@ -29,7 +29,7 @@ export default function WalletScreen({navigation}) {
   const [wamount, setWamount] = useState({});
   const [inr, setInr] = useState('');
   const [usd, setUsd] = useState('');
-  const [screenShot, setScreenshot] = useState('');
+  const [screenShot, setScreenshot] = useState([]);
   const [screenshootTwo, setScreenshootTwo] = useState('');
 
   const copyToClipboard = () => {
@@ -80,7 +80,7 @@ export default function WalletScreen({navigation}) {
 
     formdata.append('usd', 0);
     formdata.append('inr', inr);
-    formdata.append('screenshot', screenShot);
+    formdata.append('screenshot', screenShot.assets[0].base64);
 
     fetch('http://65.0.80.5:5000/api/admin/req_amount', {
       method: 'post',
@@ -113,12 +113,12 @@ export default function WalletScreen({navigation}) {
     addAmountUsd();
   }
   const addAmountUsd = async () => {
-    console.log(usd, screenshootTwo);
+    console.log(usd, screenshootTwo.assets[0].base64);
     let formdata = new FormData();
 
     formdata.append('usd', usd);
     formdata.append('inr', 0);
-    formdata.append('screenshot', screenshootTwo);
+    formdata.append('screenshot', screenshootTwo.assets[0].base64);
 
     fetch('http://65.0.80.5:5000/api/admin/req_amount', {
       method: 'post',
@@ -148,32 +148,18 @@ export default function WalletScreen({navigation}) {
 
   // <=============== Get Image ==============>
 
-  const chooseFrontFile = photo => {
-    // try {
-    //   const res = await DocumentPicker.pick({
-    //     type: [DocumentPicker.types.images],
-    //   });
-    //   console.log('res : ' + JSON.stringify(res));
-    //   setScreenshot(res[0].uri);
-    // } catch (err) {
-    //   if (DocumentPicker.isCancel(err)) {
-    //     alert('Canceled from single doc picker');
-    //   } else {
-    //     alert('Unknown Error: ' + JSON.stringify(err));
-    //     throw err;
-    //   }
-    // }
+  const chooseFrontFile = type => {
     let options = {
-      mediaType: photo,
+      mediaType: 'photo',
       maxWidth: 100,
       maxHeight: 100,
       selectionLimit: 1,
       includeBase64: true,
     };
     launchImageLibrary(options, response => {
-      console.log('response : ' + JSON.stringify(response.assets[0].base64));
-      setScreenshot(response.assets[0].base64);
-      console.log(response);
+      console.log('response : ' + JSON.stringify(response));
+      setScreenshot(response);
+      console.log(response.assets[0].base64);
       if (response.didCancel) {
         alert('User cancelled camera picker');
         return;
@@ -195,11 +181,12 @@ export default function WalletScreen({navigation}) {
       mediaType: type,
       maxWidth: 80,
       maxHeight: 80,
+      includeBase64: true,
     };
     launchImageLibrary(options, response => {
-      console.log('response : ' + JSON.stringify(response.assets[0].uri));
-      setScreenshootTwo(response.assets[0].uri);
-      console.log(response.assets[0].uri);
+      console.log('response : ' + JSON.stringify(response));
+      setScreenshootTwo(response);
+      console.log(response.assets[0].base64);
       if (response.didCancel) {
         alert('User cancelled camera picker');
         return;
@@ -306,7 +293,7 @@ export default function WalletScreen({navigation}) {
                   </View>
                   <View style={styles.inputImage}>
                     <Text style={styles.inputText}>Attach ScreenShot</Text>
-                    <View style={{flexDirection: 'row'}}>
+                    <View style={{flexDirection: 'column'}}>
                       <TouchableOpacity
                         style={styles.form}
                         onPress={() => chooseFrontFile()}>
@@ -315,18 +302,17 @@ export default function WalletScreen({navigation}) {
                           source={require('../src/upload.png')}
                         />
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.form}>
-                        <Image
-                          source={{uri: `${screenShot}`}}
-                          style={{
-                            height: 200,
-                            width: 60,
-                            justifyContent: 'center',
-                            alignSelf: 'center',
-                            flex: 1,
-                          }}
-                        />
-                      </TouchableOpacity>
+                      {screenShot != '' &&
+                      screenShot != undefined &&
+                      screenShot != null ? (
+                        <TouchableOpacity style={styles.form2}>
+                          <Text>{screenShot.assets[0].fileName}</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity style={styles.form2}>
+                          <Text>No Image</Text>
+                        </TouchableOpacity>
+                      )}
                     </View>
                   </View>
                   <View style={styles.modalBtn}>
@@ -391,7 +377,7 @@ export default function WalletScreen({navigation}) {
                   </View>
                   <View style={styles.inputImage}>
                     <Text style={styles.inputText}>Attach ScreenShot</Text>
-                    <View style={{flexDirection: 'row'}}>
+                    <View style={{flexDirection: 'column'}}>
                       <TouchableOpacity
                         style={styles.form}
                         onPress={() => chooseScreenShot('photo')}>
@@ -400,18 +386,17 @@ export default function WalletScreen({navigation}) {
                           source={require('../src/upload.png')}
                         />
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.form}>
-                        <Image
-                          source={{uri: `${screenshootTwo}`}}
-                          style={{
-                            height: 200,
-                            width: 60,
-                            justifyContent: 'center',
-                            alignSelf: 'center',
-                            flex: 1,
-                          }}
-                        />
-                      </TouchableOpacity>
+                      {screenshootTwo != '' &&
+                      screenshootTwo != undefined &&
+                      screenshootTwo != null ? (
+                        <TouchableOpacity style={styles.form2}>
+                          <Text>{screenshootTwo.assets[0].fileName}</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity style={styles.form2}>
+                          <Text>No Image</Text>
+                        </TouchableOpacity>
+                      )}
                     </View>
                   </View>
                   <View style={styles.modalBtn}>
@@ -600,6 +585,12 @@ const styles = StyleSheet.create({
   form: {
     backgroundColor: 'white',
     height: 120,
+    width: 140,
+    margin: 2,
+  },
+  form2: {
+    backgroundColor: 'white',
+    height: 50,
     width: 140,
     margin: 2,
   },
