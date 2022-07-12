@@ -151,8 +151,8 @@ export default function WalletScreen({navigation}) {
   const chooseFrontFile = type => {
     let options = {
       mediaType: 'photo',
-      maxWidth: 100,
-      maxHeight: 100,
+      maxWidth: 500,
+      maxHeight: 500,
       selectionLimit: 1,
       includeBase64: true,
     };
@@ -179,8 +179,8 @@ export default function WalletScreen({navigation}) {
   const chooseScreenShot = type => {
     let options = {
       mediaType: type,
-      maxWidth: 80,
-      maxHeight: 80,
+      maxWidth: 500,
+      maxHeight: 500,
       includeBase64: true,
     };
     launchImageLibrary(options, response => {

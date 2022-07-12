@@ -77,8 +77,8 @@ export default function KycScreen({navigation}) {
   const captureImage = async type => {
     let options = {
       mediaType: 'photo',
-      maxWidth: 200,
-      maxHeight: 200,
+      maxWidth: 400,
+      maxHeight: 400,
       saveToPhotos: true,
       includeBase64: true,
     };
@@ -108,8 +108,8 @@ export default function KycScreen({navigation}) {
   const chooseFrontFile = type => {
     let options = {
       mediaType: 'photo',
-      maxWidth: 200,
-      maxHeight: 200,
+      maxWidth: 400,
+      maxHeight: 400,
       includeBase64: true,
     };
     launchImageLibrary(options, response => {
@@ -133,9 +133,9 @@ export default function KycScreen({navigation}) {
   };
   const chooseBackFile = type => {
     let options = {
-      mediaType: type,
-      maxWidth: 200,
-      maxHeight: 200,
+      mediaType: 'photo',
+      maxWidth: 400,
+      maxHeight: 400,
       includeBase64: true,
     };
     launchImageLibrary(options, response => {
