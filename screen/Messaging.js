@@ -14,6 +14,7 @@ import {
   Alert,
   Button,
 } from 'react-native';
+import CustomHeader from './header/CustomHeader';
 
 export default function Messaging({navigation}) {
   const [currentUser] = useState({
@@ -97,33 +98,11 @@ export default function Messaging({navigation}) {
     ]);
     setInputMessage('');
   }
-  function CustomHeader({title}) {
-    return (
-      <View
-        style={{flexDirection: 'row', height: 50, backgroundColor: 'white'}}>
-        <View style={{flex: 1, justifyContent: 'center'}}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Chat', {name: 'Chat'})}>
-            <Image
-              style={{width: 30, height: 30, marginLeft: 20}}
-              source={require('../src/back.png')}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        </View>
-        <View style={{flex: 3, justifyContent: 'center'}}>
-          <Text style={{textAlign: 'center', fontWeight: '800', fontSize: 20}}>
-            {title}
-          </Text>
-        </View>
-        <View style={{flex: 1, justifyContent: 'center'}}></View>
-      </View>
-    );
-  }
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
-        <CustomHeader />
+        <CustomHeader title="" navigation={navigation} />
         <FlatList
           style={{backgroundColor: 'white'}}
           inverted={true}

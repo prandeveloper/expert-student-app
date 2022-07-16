@@ -123,11 +123,11 @@ function TabScreen() {
         component={AllCourses}
         options={{headerShown: false}}
       />
-      {/* <Tab.Screen
+      <Tab.Screen
         name="Chat"
         component={ChatScreen}
         options={{headerShown: false}}
-      /> */}
+      />
       <Tab.Screen
         name="Wallet"
         component={WalletScreen}

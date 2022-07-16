@@ -17,7 +17,7 @@ function NotifyHeader({title, navigation}) {
           alignItems: 'flex-start',
           margin: 10,
         }}>
-        <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+        <TouchableOpacity onPress={() => navigation.pop('Home')}>
           <Icon name="arrow-left" color="black" size={22} />
         </TouchableOpacity>
       </View>
